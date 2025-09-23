@@ -1,6 +1,6 @@
 import { Car } from "../entities/car";
 import DbAccess from "../infraestructure/database/DbAccess";
-import CarService from "../services/CarService";
+import CarService from "../domain/services/CarService";
 import { CarType } from "../infraestructure/database/CarType";
 
 jest.mock('../database/DbAccess');

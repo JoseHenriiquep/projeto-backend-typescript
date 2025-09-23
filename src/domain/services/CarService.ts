@@ -1,7 +1,7 @@
-import { Car } from "../entities/car";
-import DbAccess from "../infraestructure/database/DbAccess";
-import { CarDTO, ViewCarDTO } from "../types/CarDTO";
-import { CarType } from "../infraestructure/database/CarType";
+import { Car } from "../../entities/car";
+import DbAccess from "../../infraestructure/database/DbAccess";
+import { CarDTO, ViewCarDTO } from "../../domain/dtos/CarDTO";
+import { CarType } from "../../infraestructure/database/CarType";
 
 export default class CarService {
   private readonly dbAccess: DbAccess;

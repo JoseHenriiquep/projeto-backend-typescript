@@ -1,9 +1,9 @@
 import { Request, Response, Router } from "express";
-import DbAccess from "../database/DbAccess";
-import { Car } from "../database/car";
-import { CarDTO, updateCarDTO } from "../types/CarDTO";
+import DbAccess from "../../infraestructure/database/DbAccess";
+import { Car } from "../../entities/car";
+import { CarDTO, updateCarDTO } from "../../domain/dtos/CarDTO";
 import { body, param, validationResult } from "express-validator";
-import CarService from "../services/CarService";
+import CarService from "../../domain/services/CarService";
 
 class CarController {
   private readonly dbAccess: DbAccess;  
