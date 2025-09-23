@@ -1,7 +1,7 @@
 import { Router } from "express";
-import DbAccess from "../database/DbAccess";
+import DbAccess from "../../infraestructure/database/DbAccess";
 import CarController from "../controllers/CarController";
-import CarService from "../services/CarService";
+import CarService from "../../services/CarService";
 
 const routes = Router();
 

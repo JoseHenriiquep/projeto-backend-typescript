@@ -1,4 +1,4 @@
-import { CarType } from "../types/CarType"
+import { CarType } from "./CarType"
 
 export type DbType = {
   cars: CarType[]

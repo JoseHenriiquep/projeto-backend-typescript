@@ -1,8 +1,8 @@
 import path from "path";
 import fs from 'fs';
-import { DbType } from "../types/DbType";
-import { CarType } from "../types/CarType";
-import { Car } from "./car";
+import { DbType } from "./DbType";
+import { CarType } from "./CarType";
+import { Car } from "../../entities/car";
 
 export default class DbAccess {
   public filePath: string;
