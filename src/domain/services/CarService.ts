@@ -1,46 +1,43 @@
-import { Car } from "../../entities/car";
-import DbAccess from "../../infraestructure/database/DbAccess";
-import { CarDTO, ViewCarDTO } from "../../domain/dtos/CarDTO";
-import { CarType } from "../../infraestructure/database/CarType";
+import { Car } from "../../entities/Car";
+import CarRepository from "../../infraestructure/database/CarRepository";
+import { ViewCarDTO } from "../../domain/dtos/CarDTO";
+import { inject, injectable } from "inversify";
+import 'reflect-metadata';
+import CarServiceInterface from "../interfaces/CarServiceInterface";
 
-export default class CarService {
-  private readonly dbAccess: DbAccess;
-  constructor(dbAccess: DbAccess){
-    this.dbAccess = dbAccess;
+@injectable()
+export default class CarService implements CarServiceInterface {
+  private readonly carRepository: CarRepository;
+
+  constructor(
+    @inject('CarRepository')
+    carRepository: CarRepository
+  ){
+    this.carRepository = carRepository;
   }
 
-  getAll(): CarType[] | undefined {
-    const cars = this.dbAccess.getCars();
-    if (!cars) return undefined;
+  async getAll(): Promise<Car[]> {
+    const cars: Car[] | undefined = await this.carRepository.getCars();
     return cars;
   }
 
-  getById(id: number): ViewCarDTO | undefined {
-    const car = this.dbAccess.getCarById(+id);
-    if (!car) return undefined 
-    const carDto: ViewCarDTO = {
-      id: car.id,
-      brand: car.brand,
-      model: car.model,
-      year: car.year,
-      available: car.available
-    };
+  async getById(id: string): Promise<ViewCarDTO | undefined> {
+    const carDto: ViewCarDTO | undefined = await this.carRepository.getCarById(id);
+    if (!carDto) return undefined 
     return carDto;
   }
 
-  add(car: Car): CarType[] {
-    return this.dbAccess.addCar(car);
+  async add(storeId: string, car: Car): Promise<Car[]> {
+    return await this.carRepository.addCar(storeId, car);
   }
 
-  update(id: number, carUpdated: Partial<Car>): CarType | undefined {
-    const newCar = this.dbAccess.updateCar(id, carUpdated)
-    if (!newCar) return undefined
-    return newCar;
+  async update(id: string, carData: Partial<Car>): Promise<Car | undefined> {
+    const updatedCar = await this.carRepository.updateCar(id, carData)
+    return updatedCar ?? undefined;
   }
 
-  remove(id: number): boolean {
-    const removedCar = this.dbAccess.removeCar(+id);
-    if (!removedCar) return false;
-    return removedCar;
+  async remove(id: string): Promise<boolean> {
+    const removedCar = await this.carRepository.removeCar(id);
+    return removedCar ?? undefined;
   }
 }

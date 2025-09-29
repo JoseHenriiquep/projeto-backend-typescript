@@ -1,15 +1,10 @@
 import { Router } from "express";
-import DbAccess from "../../infraestructure/database/DbAccess";
 import CarController from "../controllers/CarController";
-import CarService from "../../services/CarService";
+import container from '../config/inversifyConfig'
 
 const routes = Router();
 
-const dbAccess = new DbAccess();
-const carService = new CarService(dbAccess);
-const carController = new CarController(dbAccess, carService);
-
-carController.routes();
+const carController = container.get<CarController>('CarController');
 
 routes.use('/cars', carController.router);
 

@@ -1,17 +1,12 @@
-export type CarDTO = {
-  brand: string;
-  model: string;
-  year: number;
-  plate: string;
-  available: boolean;
-}
+import { ObjectId } from "mongodb";
+import { Car } from "../../entities/Car";
 
 export type ViewCarDTO = {
-  id: number,
+  _id: ObjectId,
   brand: string;
   model: string;
   year: number;
   available: boolean;
 }
 
-export type updateCarDTO = Partial<CarDTO>
+export type updateCarDTO = Partial<Car>

@@ -1,163 +1,147 @@
-import { Car } from "../entities/car";
-import DbAccess from "../infraestructure/database/DbAccess";
-import CarService from "../domain/services/CarService";
-import { CarType } from "../infraestructure/database/CarType";
 
-jest.mock('../database/DbAccess');
+import CarRepository from "../infraestructure/database/CarRepository";
+import CarService from "../domain/services/CarService";
+import { ViewCarDTO } from "../domain/dtos/CarDTO";
+import { ObjectId } from "mongodb";
+import { Car } from "../entities/Car";
+
+jest.mock('../infraestructure/database/CarRepository');
 
 describe('CarService', () => {
   let carService: CarService;
-  let dbAccess: jest.Mocked<DbAccess>;
+  let carRepository: jest.Mocked<CarRepository>;
 
-  describe('Return cars', () => {
-    beforeEach(() => {
-      dbAccess = new DbAccess() as jest.Mocked<DbAccess>;
-      carService = new CarService(dbAccess);
-    })
+  beforeEach(() => {
+    carRepository = new CarRepository() as jest.Mocked<CarRepository>;
+    carService = new CarService(carRepository);
+  });
 
-    it('Return all cars', () => {
-      const mockCars: CarType[] = [
-        { 
-          id: 1, 
-          brand: 'marca1', 
-          model: 'modelo1', 
-          year: 2025, 
-          plate: 'PLACA1', 
-          available: true 
-        },
-        {
-          id: 2, 
-          brand: 'marca2', 
-          model: 'modelo2', 
-          year: 2025, 
-          plate: 'PLACA2', 
-          available: true 
-        }
-      ]
-
-      dbAccess.getCars.mockReturnValue(mockCars);
-
-      const cars = carService.getAll();
-
-      expect(dbAccess.getCars).toHaveBeenCalledTimes(1);
-      expect(cars).toEqual(mockCars);
-    })
-
-    it('Return car by Id', () => {
-      const mockCar: CarType = { 
-        id: 1, 
-        brand: 'marca', 
-        model: 'modelo', 
+  it('Return all cars', async () => {
+    const mockCars: Car[] = [
+      { 
+        brand: 'marca1', 
+        model: 'modelo1', 
         year: 2025, 
-        plate: 'QYL9C', 
+        plate: 'PLACA1', 
         available: true 
-      };
-
-      dbAccess.getCarById.mockReturnValue(mockCar);
-
-      const car = carService.getById(1);
-
-      expect(dbAccess.getCarById).toHaveBeenLastCalledWith(1);
-      expect(car).toEqual({
-        id: 1, 
-        brand: 'marca', 
-        model: 'modelo', 
+      },
+      {
+        brand: 'marca2', 
+        model: 'modelo2', 
         year: 2025, 
+        plate: 'PLACA2', 
         available: true 
-      });
-    })
-  })
+      }
+    ]
 
-  describe('Add new Car', () => {
-    beforeEach(() => {
-      dbAccess = new DbAccess() as jest.Mocked<DbAccess>;
-      carService = new CarService(dbAccess);
-    })
-    it('Add new car and return to new list', () => {
-      const newCar = new Car('marca3', 'modelo3', 2025, 'PLACA3', true);
+    carRepository.getCars.mockResolvedValue(mockCars);
 
-      const mockCars: CarType[] = [
-        { 
-          id: 1, 
-          brand: 'marca1', 
-          model: 'modelo1', 
-          year: 2025, 
-          plate: 'PLACA1', 
-          available: true 
-        },
-        {
-          id: 2, 
-          brand: 'marca2', 
-          model: 'modelo2', 
-          year: 2025, 
-          plate: 'PLACA2', 
-          available: true 
-        },
-        newCar
-      ]
+    const cars = await carService.getAll();
 
-      dbAccess.addCar.mockReturnValue(mockCars);
+    expect(carRepository.getCars).toHaveBeenCalledTimes(1);
+    expect(cars).toEqual(mockCars);
+  });
 
-      const result = carService.add(newCar);
+  it('Return car by Id', async () => {
+    const mockCar: Car = { 
+      brand: 'marca', 
+      model: 'modelo', 
+      year: 2025, 
+      plate: 'RFT5J84',
+      available: true 
+    };
 
-      expect(dbAccess.addCar).toHaveBeenCalledTimes(1);
-      expect(dbAccess.addCar).toHaveBeenCalledWith(newCar);
-      expect(result).toEqual(mockCars);
-    })
-  })
+    const validId = new ObjectId().toString();
 
-  describe('Remove car', () => {
-    beforeEach(() => {
-      dbAccess = new DbAccess() as jest.Mocked<DbAccess>;
-      carService = new CarService(dbAccess);
-    })
+    const mockCarDto: ViewCarDTO = {
+      _id: new ObjectId(validId),
+      brand: mockCar.brand,
+      model: mockCar.model,
+      year: mockCar.year,
+      available: mockCar.available
+    }
 
-    it('Remove the car by id', () => {
-      dbAccess.removeCar.mockReturnValue(true);
+    carRepository.getCarById.mockResolvedValue(mockCarDto);
 
-      const result = carService.remove(1);
+    const car = await carService.getById(validId);
 
-      expect(dbAccess.removeCar).toHaveBeenCalledTimes(1);
-      expect(dbAccess.removeCar).toHaveBeenCalledWith(1);
-      expect(result).toBe(true);
-    })
+    expect(carRepository.getCarById).toHaveBeenLastCalledWith(validId);
+    expect(car).toEqual({
+      _id: mockCarDto._id, 
+      brand: 'marca', 
+      model: 'modelo', 
+      year: 2025, 
+      available: true 
+    });
+  });
 
-  })
+  it('Add new car and return to new list', async () => {
+    const newCar = new Car('marca3', 'modelo3', 2025, 'PLACA3', true);
 
-  describe('Update car', () => {
-    beforeEach(() => {
-      dbAccess = new DbAccess() as jest.Mocked<DbAccess>;
-      carService = new CarService(dbAccess);
-    })
-    it('Update the car by id and return updated car', () => {
-      const mockCar: CarType = 
-        { 
-          id: 1, 
-          brand: 'marca1', 
-          model: 'modelo1', 
-          year: 2025, 
-          plate: 'PLACA1', 
-          available: true 
-        }
+    const mockCars: Car[] = [
+      { 
+        brand: 'marca1', 
+        model: 'modelo1', 
+        year: 2025, 
+        plate: 'PLACA1', 
+        available: true 
+      },
+      {
+        brand: 'marca2', 
+        model: 'modelo2', 
+        year: 2025, 
+        plate: 'PLACA2', 
+        available: true 
+      },
+      newCar
+    ]
 
-      const updatedData = {
-        brand: 'Honda', 
-        model: 'Civic', 
-        plate: 'EHY7O95', 
+    carRepository.addCar.mockResolvedValue(mockCars);
+
+    const result = await carService.add(newCar);
+
+    expect(carRepository.addCar).toHaveBeenCalledTimes(1);
+    expect(carRepository.addCar).toHaveBeenCalledWith(newCar);
+    expect(result).toEqual(mockCars);
+  });
+
+  it('Remove the car by id', async () => {
+    carRepository.removeCar.mockResolvedValue(true);
+
+    const result = await carService.remove('1');
+
+    expect(carRepository.removeCar).toHaveBeenCalledTimes(1);
+    expect(carRepository.removeCar).toHaveBeenCalledWith('1');
+    expect(result).toBe(true);
+  });
+
+  it('Update the car by id and return updated car', async () => {
+    const mockCar: Car = 
+      { 
+        brand: 'marca1', 
+        model: 'modelo1', 
+        year: 2025, 
+        plate: 'PLACA1', 
+        available: true 
       }
 
-      const updatedCar: CarType = {
-        ...mockCar,
-        ...updatedData
-      };
+    const updatedData = {
+      brand: 'Honda', 
+      model: 'Civic', 
+      plate: 'EHY7O95', 
+    }
 
-      dbAccess.updateCar.mockReturnValue(updatedCar);
+    const updatedCar: Car = {
+      ...mockCar,
+      ...updatedData
+    };
 
-      const result = carService.update(1, updatedData);
+    carRepository.updateCar.mockResolvedValue(updatedCar);
 
-      expect(dbAccess.updateCar).toHaveBeenCalledTimes(1);
-      expect(dbAccess.updateCar).toHaveBeenCalledWith(1, updatedData);
-      expect(result).toEqual(updatedCar)
-    })
-  })
-})
+    const result = await carService.update('1', updatedData);
+
+    expect(carRepository.updateCar).toHaveBeenCalledTimes(1);
+    expect(carRepository.updateCar).toHaveBeenCalledWith('1', updatedData);
+    expect(result).toEqual(updatedCar)
+  });
+});

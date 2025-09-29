@@ -1,7 +1,9 @@
 import express, { Request, Response } from 'express';
-import routes from './src/routes/CarRoute';
-import LogMiddleware from './src/middlewares/logMiddleware';
-import AuthMiddleware from './src/middlewares/authMiddleware';
+import CarRoutes from './src/api/routes/CarRoute';
+import StoreRoutes from './src/api/routes/StoreRoute'
+import LogMiddleware from './src/infraestructure/middlewares/logMiddleware';
+import AuthMiddleware from './src/infraestructure/middlewares/authMiddleware';
+import MongooseConfig from './src/infraestructure/dbConfig/mongooseConfig'
 
 const app = express();
 const port = 3000;
@@ -9,7 +11,11 @@ const port = 3000;
 app.use(express.json());
 app.use(LogMiddleware.init());
 app.use(AuthMiddleware.init())
-app.use('/api', routes);
+
+MongooseConfig.connect();
+
+app.use('/api', CarRoutes);
+app.use('/api', StoreRoutes )
 
 app.get('/', (req: Request, res: Response) => {
   res.json('Primeira rota');
