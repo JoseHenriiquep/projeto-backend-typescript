@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
 import CarRoutes from './src/api/routes/CarRoute';
 import StoreRoutes from './src/api/routes/StoreRoute'
-import LogMiddleware from './src/infraestructure/middlewares/logMiddleware';
-import AuthMiddleware from './src/infraestructure/middlewares/authMiddleware';
+import LogMiddleware from './src/api/middlewares/logMiddleware';
+import AuthMiddleware from './src/api/middlewares/authMiddleware';
 import MongooseConfig from './src/infraestructure/dbConfig/mongooseConfig'
 
 const app = express();
