@@ -1,5 +1,6 @@
 import mongoose, { Schema, Types } from "mongoose";
 import { Store } from "../../entities/Store";
+import { CarModel } from "./CarModel";
 
 const StoreSchema: Schema = new Schema({
   name: {
@@ -24,13 +25,14 @@ StoreSchema.virtual('cars', {
 
 StoreSchema.set("toJSON", {
   virtuals: true,
-  versionKey: false, // remove __v
+  versionKey: false, 
   transform: (doc, ret: any) => {
-    ret.id = ret._id.toString(); // mantém id
-    delete ret._id; // remove _id duplicado
+    ret.id = ret._id.toString(); 
+    delete ret._id; 
     return ret;
   }
 });
+
 StoreSchema.set("toObject", {
   virtuals: true,
   versionKey: false,
@@ -39,6 +41,12 @@ StoreSchema.set("toObject", {
     delete ret._id;
     return ret;
   }
+});
+
+StoreSchema.pre("findOneAndDelete", async function (next) {
+  const storeId = this.getQuery()["_id"]; 
+  await CarModel.deleteMany({ store: storeId }); 
+  next();
 });
 
 export const StoreModel = mongoose.model<Store>('Store', StoreSchema);
